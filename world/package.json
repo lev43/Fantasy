@@ -1,0 +1,15 @@
+{
+  "name": "Fantasy-World",
+  "version": "1.0.0",
+  "description": "Данный бот используется в игре Fantasy",
+  "main": "main-world.js",
+  "dependencies": {
+    "discord.js": "^12.1.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "lev43",
+  "license": "ISC"
+}
