@@ -10,6 +10,11 @@ const Worlds=require('./world.js').World;
 const Location=require('./world.js').Location;
 world.wm=require('./world.js').WorldManager;
 
+const Enemys=require('./enemy.js');
+const Enemy=Enemys.Enemy;
+const Player=Enemys.Player;
+
+
 if(worldFile)world.map=JSON.parse(worldFile);
 else{
 	world.map=new Worlds();
@@ -38,10 +43,11 @@ world.on('ready', () => {
 world.login(token);
 
 world.on('message', async message => {
-	fs.writeFileSync("world.json", JSON.stringify(map), (err)=>{if(err)throw err;});
 	if (message.author.bot) return;
 	let userName = message.author.username;
 	let userID = message.author.id;
+	let player=world.wm.getEnemy(world.map.locations, userID);
+	if(!player)player=new Player(userName, userID, world.map.locations[0]);
 	world.send=(msg)=>{message.channel.send(msg);};
 	let messageArray = message.content.split(" ");
 	for(let i=0;i<messageArray.length;i++){
@@ -51,8 +57,8 @@ world.on('message', async message => {
 		args.splice(0,1);
 		let cmd = world.commands.get(command);
 		if (cmd) {
-			cmd.run(world, message, args);
+			cmd.run(world, message, args, player);
 		};
 	};
-	console.log(map);
+	fs.writeFileSync("world.json", JSON.stringify(map), (err)=>{if(err)throw err;});
 });
