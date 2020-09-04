@@ -6,19 +6,17 @@ let config = require('./botconfig.json');
 let token = config.world;
 
 let worldFile=fs.readFileSync("world.json", "utf8");
-const Worlds=require('./world.js').World;
+const World=require('./world.js').World;
 const Location=require('./world.js').Location;
-world.wm=require('./world.js').WorldManager;
 
 const Enemys=require('./enemy.js');
 const Enemy=Enemys.Enemy;
 const Player=Enemys.Player;
 
+let locations;
+if(worldFile)locations=JSON.parse(worldFile);
 
-if(worldFile)world.map=JSON.parse(worldFile);
-else{
-	world.map=new Worlds();
-};
+world.map=new World(locations);
 let map=world.map;
 
 
@@ -46,8 +44,9 @@ world.on('message', async message => {
 	if (message.author.bot) return;
 	let userName = message.author.username;
 	let userID = message.author.id;
-	let player=world.wm.getEnemy(world.map.locations, userID);
+	let player=world.map.getEnemy(userID);
 	if(!player)player=new Player(userName, userID, world.map.locations[0]);
+	world.map.clearDoubleEnemy(player.id);
 	world.send=(msg)=>{message.channel.send(msg);};
 	let messageArray = message.content.split(" ");
 	for(let i=0;i<messageArray.length;i++){
@@ -60,5 +59,5 @@ world.on('message', async message => {
 			cmd.run(world, message, args, player);
 		};
 	};
-	fs.writeFileSync("world.json", JSON.stringify(map), (err)=>{if(err)throw err;});
+	fs.writeFileSync("world.json", JSON.stringify(map.locations), (err)=>{if(err)throw err;});
 });

@@ -1,7 +1,7 @@
 {
-  "name": "Fantasy-World",
+  "name": "Fantasy-world",
   "version": "1.0.0",
-  "description": "Данный бот используется в игре Fantasy",
+  "description": "Проэкт Fantasy",
   "main": "main-world.js",
   "dependencies": {
     "discord.js": "^12.1.1"
