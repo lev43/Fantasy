@@ -27,19 +27,23 @@ class World{
 		location.parent=parent.name;
 		parent.locations.push(location);
 	}
-	getLocation(name){
+	getLocation(name, depth=999, location=this){
 		let loc=true;
-		let map=this.locations;
+		let map=location.locations;
+		let dd=depth;
+		if(location.parent==name)return this.getLocation(location.parent);
 		while(loc){
 			loc=false;
-			for(let i=0;i<map.length;i++){
-				if(map[i].name==name )return map[i];
+			for(let i=0;i<map.length && depth>0;i++){
+				if(map[i].name==name)return map[i];
 				if(map[i].locations){
 					map=map[i].locations;
 					loc=true;
+					depth--;
 				};
 			};
 		};
+		if(location.parent!="NULL" && dd>0)return this.getLocation(name, dd-1, this.getLocation(location.parent));
 		return false;
 	}
 	deleteLocation(name){
@@ -125,9 +129,6 @@ class World{
 		world.emit("move", enemy, direction);
 		this.deleteEnemy(enemy.id);
 	}
-};
-class WorldManager{
-	
 };
 
 module.exports={

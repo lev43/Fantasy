@@ -19,7 +19,6 @@ if(worldFile)locations=JSON.parse(worldFile);
 world.map=new World(locations);
 let map=world.map;
 
-
 fs.readdir('./cmds-world/', (err, files) => {
 	if (err) console.log(err);
 	let jsfiles = files.filter(f => f.split(".").pop() === "js");
@@ -42,12 +41,12 @@ world.login(token);
 
 world.on('message', async message => {
 	if (message.author.bot) return;
+	world.send=(msg)=>{message.channel.send(msg);};
 	let userName = message.author.username;
 	let userID = message.author.id;
 	let player=world.map.getEnemy(userID);
-	if(!player)player=new Player(userName, userID, world.map.locations[0]);
+	if(!player)player=new Player(userName, userID, world.map.locations[0], 1);
 	world.map.clearDoubleEnemy(player.id);
-	world.send=(msg)=>{message.channel.send(msg);};
 	let messageArray = message.content.split(" ");
 	for(let i=0;i<messageArray.length;i++){
 		let commandArray = messageArray[i].split("->");
