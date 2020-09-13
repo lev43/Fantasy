@@ -6,6 +6,7 @@ let config = require('./botconfig.json');
 let token = config.world;
 
 let worldFile=fs.readFileSync("world.json", "utf8");
+let channels=JSON.parse(fs.readFileSync("channel-player.json", "utf8"));
 const World=require('./world.js').World;
 const Location=require('./world.js').Location;
 
@@ -15,6 +16,15 @@ const Player=Enemys.Player;
 
 let locations;
 if(worldFile)locations=JSON.parse(worldFile);
+
+
+world.sendId=(msg, id)=>{
+	world.channels.fetch(channels[id]).then(channel => channel.send(msg));
+};
+world.sendIdc=(msg, id)=>{
+	world.channels.fetch(id).then(channel => channel.send(msg));
+};
+
 
 world.map=new World(locations);
 let map=world.map;
@@ -45,7 +55,11 @@ world.on('message', async message => {
 	let userName = message.author.username;
 	let userID = message.author.id;
 	let player=world.map.getEnemy(userID);
-	if(!player)player=new Player(userName, userID, world.map.locations[0], 1);
+	//if(!player)player=new Player(userName, userID, world.map.locations[0], 1);
+	if(!channels[userID]){
+		message.guild.channels.create(userName, {type:'text'})
+		.then(channel=>{channels[userID]=channel.id; console.log("new channel!", channel.id);}).catch(console.error);
+	};
 	world.map.clearDoubleEnemy(player.id);
 	let messageArray = message.content.split(" ");
 	for(let i=0;i<messageArray.length;i++){
@@ -58,5 +72,17 @@ world.on('message', async message => {
 			cmd.run(world, message, args, player);
 		};
 	};
+	message.delete();
 	fs.writeFileSync("world.json", JSON.stringify(map.locations), (err)=>{if(err)throw err;});
+	fs.writeFileSync("channel-player.json", JSON.stringify(channels), (err)=>{if(err)throw err;});
+});
+
+
+//Создание локации
+world.on('create-location', (location, player)=>{
+	world.send(`**${player.name}** создал локацию **${location.name}**`);
+});
+//Удаление локации
+world.on('delete-location', (name, player)=>{
+	world.send(`**${player.name}** стер локацию **${name}**`);
 });

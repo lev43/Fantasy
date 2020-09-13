@@ -14,11 +14,11 @@ fs.readdir('./cmds-world/add/', (err, files) => {
 	});
 });
 
-module.exports.run = async (world, message, args) => {
+module.exports.run = async (world, message, args, player) => {
 	let cmd = commands.get(args[0]);
 	if (cmd) {
 		args.splice(0,1);
-		cmd.run(world, message, args);
+		cmd.run(world, message, args, player);
 	};
 };
 module.exports.help = {

@@ -1,1 +1,1 @@
-[{"name":"central","size":50,"parent":"NULL","enemys":[],"locations":[{"name":"abc","size":0,"parent":"central","enemys":[],"locations":[{"name":"cba","size":0,"parent":"abc","enemys":[],"locations":[{"name":"cde","size":0,"parent":"cba","enemys":[{"name":"lev43","id":"633732275753844774","spawnPoint":"central","location":"central","speed":1}],"locations":[]}]}]}]}]
+[{"name":"central","size":50,"pass":["abcde"],"enemys":[{"name":"lev43","id":"633732275753844774","spawnPoint":"central","location":"central","speed":1}]},{"name":"abcde","size":0,"pass":["central"],"enemys":[]}]

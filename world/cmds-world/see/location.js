@@ -32,7 +32,7 @@ module.exports.run = async (world, message, args, player) => {
 	};
 	if(nLL>0)nLocations=`Вы видите на этой локации ${nLL} ${nL} ${locations}`+nLocations;
 	for(let i=0;i<location.locations.length;i++)nLocations+=`\n->**${location.locations[i].name}**`;
-	world.send(`${loc}\n${nEnemy}${nLocations}`);
+	world.sendId(`${loc}\n${nEnemy}${nLocations}`, player.id);
 };
 module.exports.help = {
 	name: "location"

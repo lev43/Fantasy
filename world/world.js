@@ -1,19 +1,14 @@
 class Location{
-	constructor(name="NULL", size=0, parent="NULL"){
+	constructor(name="NULL", size=0){
 		this.name=String(name);
 		this.size=parseInt(size);
-		this.parent=parent;
+		this.pass=[];
 		this.enemys=[];
-		this.locations=[];
 	}
 	s(){
 		this.name=String(this.name);
 		this.size=parseInt(this.size);
-	}
-	integrityCheck(){
-		if(typeof this.name!="string")return false;
-		if(typeof this.size!="number")return false;
-		return true;
+		if(this.size==NaN || this.size==undefined)this.size=0;
 	}
 };
 
@@ -23,111 +18,29 @@ class World{
 		if(locations)this.locations=locations;
 		else this.locations[0]=new Location("central", 50);
 	}
-	addLocation(location, parent){
-		location.parent=parent.name;
-		parent.locations.push(location);
+	addLoc=function(location){
+		this.locations.push(location);
 	}
-	getLocation(name, depth=999, location=this){
-		let loc=true;
-		let map=location.locations;
-		let dd=depth;
-		if(location.parent==name)return this.getLocation(location.parent);
-		while(loc){
-			loc=false;
-			for(let i=0;i<map.length && depth>0;i++){
-				if(map[i].name==name)return map[i];
-				if(map[i].locations){
-					map=map[i].locations;
-					loc=true;
-					depth--;
-				};
-			};
-		};
-		if(location.parent!="NULL" && dd>0)return this.getLocation(name, dd-1, this.getLocation(location.parent));
+	getLoc(name){
+		for(let i=0;i<this.locations.length;i++)
+			if(this.locations[i].name=name)return this.locations[i];
 		return false;
 	}
-	deleteLocation(name){
-		let loc=true;
-		let map=this.locations;
-		while(loc){
-			loc=false;
-			for(let i=0;i<map.length;i++){
-				if(map[i].name==name){
-					map.splice(i, 1);
-					return true;
-				};
-				if(map[i].locations){
-					map=map[i].locations;
-					loc=true;
-				};
+	deleteLoc(name){
+		for(let i=0;i<this.locations.length;i++)
+			if(this.locations[i].name=name){
+				this.locations.splice(i, 1);
+				return true;
 			};
-		};
 		return false;
 	}
 	getEnemy(id){
-		let loc=true;
-		let map=this.locations;
-		while(loc){
-			loc=false;
-			for(let i=0;i<map.length;i++){
-				for(let j=0;j<map[i].enemys.length;j++){
-					if(map[i].enemys[j].id==id )return map[i].enemys[j];
-				};
-				if(map[i].locations){
-					map=map[i].locations;
-					loc=true;
-				};
-			};
-		};
-		return false;
 	}
 	deleteEnemy(id){
-		let loc=true;
-		let map=this.locations;
-		while(loc){
-			loc=false;
-			for(let i=0;i<map.length;i++){
-				for(let j=0;j<map[i].enemys.length;j++){
-					if(map[i].enemys[j].id==id ){
-						map[i].enemys.splice(j, 1);
-						return true;
-					};
-				};
-				if(map[i].locations){
-					map=map[i].locations;
-					loc=true;
-				};
-			};
-		};
-		return false;
 	}
 	clearDoubleEnemy(id){
-		let enemys=0;
-		let loc=true;
-		let map=this.locations;
-		while(loc){
-			loc=false;
-			for(let i=0;i<map.length;i++){
-				for(let j=0;j<map[i].enemys.length;j++){
-					if(map[i].enemys[j].id==id ){
-						enemys++;
-					};
-				};
-				if(map[i].locations){
-					map=map[i].locations;
-					loc=true;
-				};
-			};
-		};
-		for(let i=enemys;i>1;i--){
-			this.deleteEnemy(id);
-		};
 	}
 	moveEnemy(world, enemy, direction){
-		enemy.location=direction.name;
-		direction.enemys.push(enemy);
-		world.emit("move", enemy, direction);
-		this.deleteEnemy(enemy.id);
 	}
 };
 
