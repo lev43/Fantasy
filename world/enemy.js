@@ -5,7 +5,6 @@ class Enemy{
 		this.spawnPoint=spawn_location.name;
 		this.location=spawn_location.name;
 		this.speed=speed;
-		spawn_location.enemys[spawn_location.enemys.length]=this;
 	}
 }
 

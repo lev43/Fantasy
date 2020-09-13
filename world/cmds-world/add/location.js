@@ -9,7 +9,7 @@ module.exports.run = async (world, message, args, player) => {
 		arg=args[i].split(":");
 		if(arg[0]=='pass'){
 			let name=world.map.getLoc(arg[1]).name;
-			if(name==false)continue;
+			if(!name)continue;
 			let y=false;
 			for(let i=1;i<=pass.length;i++){
 				if(pass[i]==name)y=true;

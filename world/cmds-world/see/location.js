@@ -6,33 +6,28 @@ module.exports.run = async (world, message, args, player) => {
 		name[0]=args[0];
 		name[1]=true;
 	};
-	let location=world.map.getLocation(name[0]);
+	let location=world.map.getLoc(name[0]);
 	if(!location){
-		location=world.map.getLocation(player.location);
+		location=world.map.getLoc(player.location);
 		name[1]=false;
 	};
 	let locations="";
-	let nEnemy='';
 	let nLocations='';
 	let loc=`Вы осматриваетесь вокруг\nВы на локации **${player.location}**`;
 	if(name[1])loc=`Вы смотрите в даль на локацию **${name[0]}**`;
-	if(location.enemys.length-(name[1]?0:1)>0)nEnemy=`Вы видите ${location.enemys.length-(name[1]?0:1)} существ\n`;
-	let nLL=location.locations.length;
-	if(location.parent!="NULL"){
-		nLocations+=`\n->**${location.parent}**`;
-		nLL++;
-	};
-	let nL=Math.floor(nLL/10)%10*10+nLL%10;
-	if(nL>9 && nL<21)nL="проходов,\nОни ведут на локации";
+	let nL=Math.floor(location.pass.length/10)%10*10+location.pass.length%10;
+	let nLL="Они ведут на локации";
+	if(nL>9 && nL<21)nL="проходов,\n";
 	else{ 
-		nL=nLL%10;
-		if(nL==1)nL='проход,\nОн ведёт на локацию';
-		else if(nL>1 && nL<5)nL="прохода,\nОни ведут на локации";
-		else if(nL>4 && nL<10 || nL==0)nL="проходов,\nОни ведут на локации";
+		nL=location.pass.length%10;
+		if(nL==1){nL='проход,\n';nLL='Он ведёт на локацию';}
+		else if(nL>1 && nL<5)nL="прохода,\n";
+		else if(nL>4 && nL<10 || nL==0)nL="проходов,\n";
 	};
-	if(nLL>0)nLocations=`Вы видите на этой локации ${nLL} ${nL} ${locations}`+nLocations;
-	for(let i=0;i<location.locations.length;i++)nLocations+=`\n->**${location.locations[i].name}**`;
-	world.sendId(`${loc}\n${nEnemy}${nLocations}`, player.id);
+	nL+=nLL;
+	if(location.pass.length>0)nLocations=`Вы видите на этой локации ${location.pass.length} ${nL} ${locations}`;
+	for(let i=0;i<location.pass.length;i++)nLocations+=`\n->**${location.pass[i]}**`;
+	world.sendId(`${loc}\n${nLocations}`, player.id);
 };
 module.exports.help = {
 	name: "location"
