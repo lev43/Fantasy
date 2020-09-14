@@ -15,10 +15,12 @@ fs.readdir('./cmds-world/delete/', (err, files) => {
 });
 
 module.exports.run = async (world, message, args, player) => {
-	let cmd = commands.get(args[0]);
-	if (cmd) {
-		args.splice(0,1);
-		cmd.run(world, message, args, player);
+	if(message.member.roles.cache.find(role=>role.name=='Божество')){
+		let cmd = commands.get(args[0]);
+		if (cmd) {
+			args.splice(0,1);
+			cmd.run(world, message, args, player);
+		};
 	};
 };
 module.exports.help = {
