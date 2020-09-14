@@ -6,6 +6,9 @@ module.exports.run = async (world, message, args, player) => {
 		if(g){
 			world.sendId(`Вы успешно удалили локацию **${args[0]}**`, player.id);
 			world.emit("delete-location", args[0], player);
+			let chan=world.channels.cache.get(world.fChannels[args[0]]);
+			chan.delete();
+			delete world.fChannels[args[0]];
 		}else world.send("Локация не найдена");
 	}else world.sendId("Вы не указали имя локации", player.id);
 };

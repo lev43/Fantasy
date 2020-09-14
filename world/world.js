@@ -16,11 +16,15 @@ class World{
 		this.locations=new Array();
 		this.enemys=new Array();
 		if(locations)this.locations=locations;
-		else this.locations[0]=new Location("central", 50);
+		else this.addLoc(new Location("central", 50));
 		if(enemys)this.enemys=enemys;
 	}
 	addLoc=function(location){
-		this.locations.push(location);
+		if(!this.getLoc(location.name)){
+			this.locations.push(location);
+			return true;
+		};
+		return false;
 	}
 	getLoc(name){
 		for(let i=0;i<this.locations.length;i++)
@@ -29,8 +33,20 @@ class World{
 	}
 	deleteLoc(name){
 		for(let i=0;i<this.locations.length;i++)
-			if(this.locations[i].name=name){
+			if(this.locations[i].name==name){
+				let loc=this.locations[i];
+				for(let j=0;j<this.enemys.length;j++)
+					if(this.enemys[j].location==name)this.deathEnemy(this.enemys[j].id);
 				this.locations.splice(i, 1);
+				for(let j=0;j<loc.pass.length;j++){
+					let loce=this.getLoc(loc.pass[j]);
+					for(let t=0;t<loce.pass.length;t++){
+						if(loce.pass[t]==name){
+							loce.pass.splice(t,1);
+							break;
+						};
+					};
+				};
 				return true;
 			};
 		return false;
@@ -65,6 +81,10 @@ class World{
 	}
 	spawnEnemy(enemy){
 		this.enemys.push(enemy);
+	}
+	deathEnemy(id){
+		let enemy=this.getEnemy(id);
+		enemy.location=enemy.spawnPoint;
 	}
 	moveEnemy(enemy, direction){
 		if(this.getLoc(direction)){

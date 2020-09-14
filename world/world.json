@@ -1,1 +1,1 @@
-[{"name":"central","size":50,"pass":["abc"]},{"name":"abc","size":0,"pass":["central","bca","ccc"]},{"name":"bca","size":0,"pass":["abc","ccc"]},{"name":"ccc","size":0,"pass":["abc","bca"]}]
+[{"name":"central","size":50,"pass":[]}]

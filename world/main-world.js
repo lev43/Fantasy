@@ -13,7 +13,7 @@ let token = config.world;
 
 let worldFile=fs.readFileSync("world.json", "utf8");
 let enemysFile=fs.readFileSync("enemy.json", "utf8");
-let channels=JSON.parse(fs.readFileSync("channel-player.json", "utf8"));
+world.fChannels=JSON.parse(fs.readFileSync("channel-player.json", "utf8"));
 const World=require('./world.js').World;
 const Location=require('./world.js').Location;
 
@@ -28,14 +28,14 @@ if(enemysFile)enemys=JSON.parse(enemysFile);
 
 
 world.sendId=(msg, id)=>{
-	world.channels.fetch(channels[id]).then(channel => channel.send(msg));
+	world.channels.fetch(world.fChannels[id]).then(channel => channel.send(msg));
 };
 world.sendIdc=(msg, id)=>{
 	world.channels.fetch(id).then(channel => channel.send(msg));
 };
 
 
-world.map=new World(locations, enemys);
+world.map=new World(locations, enemys, world);
 let map=world.map;
 
 fs.readdir('./cmds-world/', (err, files) => {
@@ -102,42 +102,46 @@ world.login(token);
 
 world.on('message', async message => {
 	if (message.author.bot){
-		setTimeout(()=>{message.delete();}, 15000);
+		setTimeout(()=>{message.delete();}, 100000);
 		return;
 	};
-	world.send=(msg)=>{message.channel.send(msg);};
+	world.send=(msg, player)=>{
+		if(player){
+			let chan=world.channels.cache.get(world.fChannels[player.location]);
+			if(!chan)return;
+			chan.send(msg);
+		}else message.channel.send(msg);
+	};
 	let userName = message.author.username;
 	let userID = message.author.id;
 	let player=world.map.getEnemy(userID);
 	if(!player)map.spawnEnemy(new Player(userName, userID, world.map.locations[0], 1));
-	if(!channels[userID]){
-		message.guild.channels.create(userName, {type:'text'})
-		.then(channel=>{channels[userID]=channel.id; console.log("new channel!", channel.id);}).catch(console.error);
+	if(!world.fChannels[userID]){
+		message.guild.channels.create(userName, {type:'text', parent:'754988552957460482'})
+		.then(channel=>{world.fChannels[userID]=channel.id; console.log("new channel player!", channel.id);}).catch(console.error);
 	};
 	world.map.clearDoubleEnemy(player.id);
 	let messageArray = message.content.split(" ");
-	for(let i=0;i<messageArray.length;i++){
-		let commandArray = messageArray[i].split("->");
-		let command = commandArray[0];
-		let args = commandArray;
-		args.splice(0,1);
-		let cmd = world.commands.get(command);
-		if (cmd) {
-			cmd.run(world, message, args, player);
-		};
+	let commandArray = messageArray[0].split("->");
+	let command = commandArray[0];
+	let args = commandArray;
+	args.splice(0,1);
+	let cmd = world.commands.get(command);
+	if (cmd) {
+		cmd.run(world, message, args, player);
 	};
 	message.delete();
 	fs.writeFileSync("world.json", JSON.stringify(map.locations), (err)=>{if(err)throw err;});
 	fs.writeFileSync("enemy.json", JSON.stringify(map.enemys), (err)=>{if(err)throw err;});
-	fs.writeFileSync("channel-player.json", JSON.stringify(channels), (err)=>{if(err)throw err;});
+	fs.writeFileSync("channel-player.json", JSON.stringify(world.fChannels), (err)=>{if(err)throw err;});
 });
 
 
 //Создание локации
 world.on('create-location', (location, player)=>{
-	world.send(`**${player.name}** создал локацию **${location.name}**`);
+	world.send(`**${player.name}** создал локацию **${location.name}**`, player);
 });
 //Удаление локации
-world.on('delete-location', (name, player)=>{
-	world.send(`**${player.name}** стер локацию **${name}**`);
+world.on('delete-location', (name, player, message)=>{
+	world.send(`**${player.name}** стер локацию **${name}**`, player);
 });

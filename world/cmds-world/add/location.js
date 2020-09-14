@@ -18,12 +18,18 @@ module.exports.run = async (world, message, args, player) => {
 		}else location[arg[0]]=arg[1];
 	};
 	if(pass.length<1)pass.push(world.map.locations[0].name);
-	for(let i=0;i<pass.length;i++)world.map.getLoc(pass[i]).pass.push(location.name);
 	location.s();
 	location.pass=pass;
-	world.map.addLoc(location);
-	world.sendId(`Вы создали локацию **${location.name}**!\nРазмер: **${location.size}**`, player.id);
-	world.emit("create-location", location, player);
+	let hasAdd=world.map.addLoc(location);
+	if(hasAdd){
+		for(let i=0;i<pass.length;i++)world.map.getLoc(pass[i]).pass.push(location.name);
+		world.sendId(`Вы создали локацию **${location.name}**!\nРазмер: **${location.size}**`, player.id);
+		world.emit("create-location", location, player);
+		if(!world.fChannels[location.name]){
+			message.guild.channels.create(location.name, {type:'text', parent:'754988488423899226'})
+			.then(channel=>{world.fChannels[location.name]=channel.id; console.log("new channel location!", channel.id);}).catch(console.error);
+		};
+	}else world.sendId(`**Такая локация уже существует!!!**`, player.id);
 };
 module.exports.help = {
 	name: "location"
