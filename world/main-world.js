@@ -102,7 +102,7 @@ world.login(token);
 
 world.on('message', async message => {
 	if (message.author.bot){
-		setTimeout(()=>{message.delete();}, 100000);
+		setTimeout(()=>{message.delete();}, 300000);
 		return;
 	};
 	world.send=(msg, player)=>{
