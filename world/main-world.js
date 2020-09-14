@@ -115,7 +115,17 @@ world.on('message', async message => {
 	let userName = message.author.username;
 	let userID = message.author.id;
 	let player=world.map.getEnemy(userID);
-	if(!player)map.spawnEnemy(new Player(userName, userID, world.map.locations[0], 1));
+	if(!player){
+		map.spawnEnemy(new Player(userName, userID, world.map.locations[0], 1));
+		player=world.map.getEnemy(userID);
+		for(channel in world.fChannels){
+			world.channels.cache.get(world.fChannels[channel]).createOverwrite(message.author, {VIEW_CHANNEL: true}, "move");
+		};
+		for(channel in world.fChannels){
+			if(channel==player.id || channel==player.spawnPoint)continue;
+			world.channels.cache.get(world.fChannels[channel]).createOverwrite(message.author, {VIEW_CHANNEL: false}, "move");
+		};
+	};
 	if(!world.fChannels[userID]){
 		message.guild.channels.create(userName, {type:'text', parent:'754988552957460482'})
 		.then(channel=>{world.fChannels[userID]=channel.id; console.log("new channel player!", channel.id);}).catch(console.error);
