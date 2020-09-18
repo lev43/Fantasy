@@ -1,0 +1,19 @@
+{
+  "name": "fantasy",
+  "version": "1.0.0",
+  "description": "Нету истории, квестов, творите все что хотите!\r ## Можно взаимодействовать почти со всем!\r Хотите уничтожить замок врага?\r Без проблем, магия, кувалда и много другого, к вашим услугам!",
+  "main": "null",
+  "scripts": {
+    "start": "echo 'start to Fantasy' && cd world && node ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lev43/Fantasy.git"
+  },
+  "author": "lev43",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lev43/Fantasy/issues"
+  },
+  "homepage": "https://github.com/lev43/Fantasy#readme"
+}

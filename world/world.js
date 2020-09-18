@@ -26,10 +26,13 @@ class World{
 		};
 		return false;
 	}
-	getLoc(name){
-		for(let i=0;i<this.locations.length;i++)
+	getLoc(name, depth=10, location='central'){
+		for(let i=0;i<this.locations.length && i<depth;i++)
 			if(this.locations[i].name==name)return this.locations[i];
 		return false;
+	}
+	calculateSpentSpeed(startLocation, endLocation){
+		
 	}
 	deleteLoc(name){
 		for(let i=0;i<this.locations.length;i++)

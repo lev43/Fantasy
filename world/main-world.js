@@ -119,11 +119,8 @@ world.on('message', async message => {
 		map.spawnEnemy(new Player(userName, userID, world.map.locations[0], 1));
 		player=world.map.getEnemy(userID);
 		for(channel in world.fChannels){
-			world.channels.cache.get(world.fChannels[channel]).createOverwrite(message.author, {VIEW_CHANNEL: true}, "move");
-		};
-		for(channel in world.fChannels){
 			if(channel==player.id || channel==player.spawnPoint)continue;
-			world.channels.cache.get(world.fChannels[channel]).createOverwrite(message.author, {VIEW_CHANNEL: false}, "move");
+			world.channels.cache.get(world.fChannels[channel]).createOverwrite(message.author, {VIEW_CHANNEL: false}, "spawn");
 		};
 	};
 	if(!world.fChannels[userID]){

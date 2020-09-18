@@ -27,7 +27,11 @@ module.exports.run = async (world, message, args, player) => {
 		world.emit("create-location", location, player);
 		if(!world.fChannels[location.name]){
 			message.guild.channels.create(location.name, {type:'text', parent:'754988488423899226'})
-			.then(channel=>{world.fChannels[location.name]=channel.id; console.log("new channel location!", channel.id);}).catch(console.error);
+			.then(channel=>{
+				world.fChannels[location.name]=channel.id;
+				channel.createOverwrite(message.guild.roles.everyone, {VIEW_CHANNEL: false}, "create-location");
+				console.log("new channel location!", channel.id);
+			}).catch(console.error);
 		};
 	}else world.sendId(`**Такая локация уже существует!!!**`, player.id);
 };
