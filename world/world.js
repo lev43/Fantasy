@@ -26,13 +26,10 @@ class World{
 		};
 		return false;
 	}
-	getLoc(name, depth=10, location='central'){
-		for(let i=0;i<this.locations.length && i<depth;i++)
-			if(this.locations[i].name==name)return this.locations[i];
-		return false;
-	}
-	calculateSpentSpeed(startLocation, endLocation){
-		
+	getLoc(name, search_in_the_aisles=false, location='central'){
+		location=this.locations.find(loc=>loc.name==location);
+		if(search_in_the_aisles && location.pass.find(loc=>loc==name)==undefined)return false;
+		else return this.locations.find(loc=>loc.name==name);
 	}
 	deleteLoc(name){
 		for(let i=0;i<this.locations.length;i++)
@@ -90,7 +87,7 @@ class World{
 		enemy.location=enemy.spawnPoint;
 	}
 	moveEnemy(enemy, direction){
-		if(this.getLoc(direction)){
+		if(this.getLoc(direction, true, enemy.location)){
 			enemy.location=direction;
 			return true;
 		}else return false;

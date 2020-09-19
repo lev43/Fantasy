@@ -9,7 +9,7 @@ module.exports.run = async (world, message, args, player) => {
 			let chan=world.channels.cache.get(world.fChannels[args[0]]);
 			chan.delete();
 			delete world.fChannels[args[0]];
-		}else world.send("Локация не найдена");
+		}else world.sendId("Локация не найдена", player.id);
 	}else world.sendId("Вы не указали имя локации", player.id);
 };
 module.exports.help = {

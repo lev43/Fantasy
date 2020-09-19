@@ -116,7 +116,7 @@ world.on('message', async message => {
 	let userID = message.author.id;
 	let player=world.map.getEnemy(userID);
 	if(!player){
-		map.spawnEnemy(new Player(userName, userID, world.map.locations[0], 1));
+		map.spawnEnemy(new Player(userName, userID, world.map.locations[0]));
 		player=world.map.getEnemy(userID);
 		for(channel in world.fChannels){
 			if(channel==player.id || channel==player.spawnPoint)continue;

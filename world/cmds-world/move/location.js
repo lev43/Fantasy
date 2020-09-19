@@ -12,7 +12,7 @@ module.exports.run = async (world, message, args, player) => {
 		world.sendId(`Вы пошли в локацию ${name}`, player.id);
 		world.emit('move-player', player, name);
 	}else
-		world.sendId(`Вы пошли в несуществующую локацию.\nУ вас ничего не вышло`, player.id);
+		world.sendId(`Вы решили пойти по не существующей тропе и у вас не получилось.`, player.id);
 };
 module.exports.help = {
 	name: "location"
