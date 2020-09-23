@@ -1,3 +1,12 @@
 {
-	"world": "NzQ3MDY0Njk1MDIxNzY0NjI4.X0JcNw.3giEsaxvlauYhoT0CujZE54tpac"
+	"world": "NzQ3MDY0Njk1MDIxNzY0NjI4.X0JcNw.3giEsaxvlauYhoT0CujZE54tpac",
+	"console": {
+		"actions": {
+			"enemy": true,
+			"player": true,
+			"events": true
+		},
+		"commands": true,
+		"messages": true
+	}
 }

@@ -5,11 +5,11 @@ let commands = new Discord.Collection();
 fs.readdir('./cmds-world/see/', (err, files) => {
 	if (err) console.log(err);
 	let jsfiles = files.filter(f => f.split(".").pop() === "js");
-	if (jsfiles.length <= 0) console.log("not commands");
-	console.log(`Loaded ${jsfiles.length} see->command(s)`);
+	if (jsfiles.length <= 0) console.log("Нету комманд");
+	console.log(`Загружено ${jsfiles.length} комманд see`);
 	jsfiles.forEach((f, i) => {
 		let props = require(`../cmds-world/see/${f}`);
-		console.log(`${i+1}.see->${f} Loaded!`);
+		console.log(`${i+1}.see->${f} Загружено!`);
 		commands.set(props.help.name, props);
 	});
 });

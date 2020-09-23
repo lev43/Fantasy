@@ -82,10 +82,6 @@ class World{
 	spawnEnemy(enemy){
 		this.enemys.push(enemy);
 	}
-	deathEnemy(id){
-		let enemy=this.getEnemy(id);
-		enemy.location=enemy.spawnPoint;
-	}
 	moveEnemy(enemy, direction){
 		if(this.getLoc(direction, true, enemy.location)){
 			enemy.location=direction;
