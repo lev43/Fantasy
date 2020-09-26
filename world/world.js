@@ -1,3 +1,5 @@
+const enemy = require("./enemy");
+
 class Location{
 	constructor(name="NULL", size=0){
 		this.name=String(name);
@@ -16,7 +18,7 @@ class World{
 		this.locations=new Array();
 		this.enemys=new Array();
 		if(locations)this.locations=locations;
-		else this.addLoc(new Location("central", 50));
+		else this.addLoc(new Location("центральная-площадь", 50));
 		if(enemys)this.enemys=enemys;
 	}
 	addLoc=function(location){
@@ -26,7 +28,7 @@ class World{
 		};
 		return false;
 	}
-	getLoc(name, search_in_the_aisles=false, location='central'){
+	getLoc(name, search_in_the_aisles=false, location='NULL'){
 		location=this.locations.find(loc=>loc.name==location);
 		if(search_in_the_aisles && location.pass.find(loc=>loc==name)==undefined)return false;
 		else return this.locations.find(loc=>loc.name==name);
@@ -36,7 +38,14 @@ class World{
 			if(this.locations[i].name==name){
 				let loc=this.locations[i];
 				for(let j=0;j<this.enemys.length;j++)
-					if(this.enemys[j].location==name)this.deathEnemy(this.enemys[j].id);
+					if(this.enemys){
+						if(this.enemys[j].spawnPoint==name){
+							this.deleteEnemy(this.enemys[j].id);
+						}
+						if(this.enemys[j].location==name){
+							this.enemys[j].location=this.enemys[j].spawnPoint;
+						}
+					}
 				this.locations.splice(i, 1);
 				for(let j=0;j<loc.pass.length;j++){
 					let loce=this.getLoc(loc.pass[j]);

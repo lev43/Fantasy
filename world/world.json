@@ -1,1 +1,1 @@
-[{"name":"central","size":50,"pass":["abc"]},{"name":"abc","size":0,"pass":["central","cba","ccc"]},{"name":"cba","size":0,"pass":["abc","ccc"]},{"name":"ccc","size":0,"pass":["cba","abc","aaa"]},{"name":"aaa","size":0,"pass":["ccc"]}]
+[{"name":"центральная-площадь","size":50,"pass":[]}]

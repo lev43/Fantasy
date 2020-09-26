@@ -22,7 +22,7 @@ const Location=require('./world.js').Location;
 const Enemys=require('./enemy.js');
 const Enemy=Enemys.Enemy;
 const Player=Enemys.Player;
-
+let central='центральная-площадь';
 let locations;
 if(worldFile)locations=JSON.parse(worldFile);
 let enemys;
@@ -116,7 +116,25 @@ setInterval(()=>{
 	let date=new Date();
 	console.log("Обновление", '\x1b[35m', date.toLocaleDateString(), date.toLocaleTimeString(), '\x1b[0m');
 	ii.update(world, enemys);
-	world.channels.cache.get(world.fChannels['central']).guild.members.fetch().then(members=>{
+	map.locations.forEach(location=>{
+		if(!world.channels.cache.find(channel=>channel.name==location.name)){
+			world.guilds.fetch('747066005645164606').then(guild=>guild.channels.create(location.name, {type:'text', parent:'754988488423899226'})
+				.then(channel=>{
+					world.fChannels[location.name]=channel.id; 
+					console.log("Новый канал локации", channel.id);
+					channel.createOverwrite(guild.roles.everyone, {VIEW_CHANNEL: false}, "create");
+				}).catch(console.error));
+		}
+		if(!world.fChannels[location.name]){
+			let channelID=world.channels.cache.find(channel=>channel.name==location.name);
+			if(channelID){
+				channelID=channelID.id;
+				world.fChannels[location.name]=channelID;
+			}
+		}
+	})
+	try{
+	world.guilds.fetch('747066005645164606').then(guild=>guild.members.fetch().then(members=>{
 		members.each(member=>{
 			let player=map.getEnemy(member.user.id);
 			for(channel in world.fChannels){
@@ -135,41 +153,37 @@ setInterval(()=>{
 					player=world.map.getEnemy(userID);
 					console.log(`Настройка прав каналов`)
 					for(channel in world.fChannels){
-						if(channel==player.id || channel=='central'){
+						if(channel==player.id || channel==central){
 							world.channels.cache.get(world.fChannels[channel]).createOverwrite(member.user, {VIEW_CHANNEL: true}, "Ready");
 						}
 					};
 				};
 				if(!world.fChannels[userID]){
-					world.channels.cache.get(world.fChannels['central']).guild.channels.create(userName, {type:'text', parent:'754988552957460482'})
+					world.guilds.fetch('747066005645164606').then(guild=>guild.channels.create(userName, {type:'text', parent:'754988552957460482'})
 					.then(channel=>{
 						world.fChannels[userID]=channel.id; 
 						console.log("Новый канал игрока", channel.id);
-						channel.createOverwrite(member.user, {VIEW_CHANNEL: true}, "Ready");
-					}).catch(console.error);
+						channel.createOverwrite(member.user, {VIEW_CHANNEL: true}, "create");
+					}).catch(console.error));
 				};
-				if(spawn)world.send(`Поприветствуем нового игрока!\nОтныне **${player.name}** живет на этих землях!`, player);
+				if(spawn)world.send(`Поприветствуем **${player.name}**!`, player);
 			};
 		});
-	}).catch(console.error);
-	map.locations.forEach(location=>{
-		if(!world.fChannels[location.name]){
-			let channelID=world.channels.cache.find(channel=>channel.name==location.name);
-			channelID=channelID.id;
-			world.fChannels[location.name]=channelID;
-		}
-	})
+	}).catch(console.error));
+	}catch(err){
+		console.log(err);
+	}
 }, 5000);
 setInterval(()=>{
 	map.enemys.forEach(enemy=>{
 		if(enemy.target && !map.enemys.find(target=>target.id==enemy.target && target.location==enemy.location)){
-			if(enemy.type='player')world.sendId(`Вы потеряли свою цель`, enemy.id);
+			if(enemy.type=='player')world.sendId(`Вы потеряли свою цель`, enemy.id);
 			enemy.target=null;
 		}
 		if(enemy.health<=0){
 			world.emit('death', enemy);
 			if(enemy.respawn){
-				world.send(`**${enemy.name}** пал(а)`, enemy)
+				world.send(`**${enemy.name}** пал`, enemy)
 				enemy.location=enemy.spawnPoint;
 				enemy.health=enemy.maxHealth;
 				world.send(`**${enemy.name}** возродился!`, enemy);
@@ -184,6 +198,8 @@ setInterval(()=>{
 	fs.writeFileSync("enemy.json", JSON.stringify(map.enemys), (err)=>{if(err)throw err;});
 	fs.writeFileSync("channel-player.json", JSON.stringify(world.fChannels), (err)=>{if(err)throw err;});
 }, 1000);
+
+
 world.on('message', async message => {
 	if (message.author.bot){
 		setTimeout(()=>{message.delete();}, 60000);
@@ -200,18 +216,9 @@ world.on('message', async message => {
 	let userID = message.author.id;
 	let player=world.map.getEnemy(userID);
 	if(!player){
-		map.spawnEnemy(new Player(userName, userID, world.map.locations[0]));
-		player=world.map.getEnemy(userID);
-		for(channel in world.fChannels){
-			if(channel==player.id || channel==player.spawnPoint)continue;
-			world.channels.cache.get(world.fChannels[channel]).createOverwrite(message.author, {VIEW_CHANNEL: false}, "spawn");
-		};
+		message.author.send("Пожайлуста подождите 5 секунд")
+		return
 	};
-	if(!world.fChannels[userID]){
-		message.guild.channels.create(userName, {type:'text', parent:'754988552957460482'})
-		.then(channel=>{world.fChannels[userID]=channel.id; console.log("Новый канал игрока", channel.id);}).catch(console.error);
-	};
-	world.map.clearDoubleEnemy(player.id);
 	let messageArray = message.content.split(" ");
 	let commandArray = messageArray[0].split("->");
 	let command = commandArray[0];
@@ -226,21 +233,24 @@ world.on('message', async message => {
 });
 
 
-//Создание локации
-world.on('create-location', (location, player)=>{
-	world.send(`**${player.name}** создал локацию **${location.name}**`, player);
-});
-//Удаление локации
-world.on('delete-location', (name, player)=>{
-	world.send(`**${player.name}** стер локацию **${name}**`, player);
-});
-//Движение существа
+world.on('create-location', (location, player)=>world.send(`**${player.name}** создал локацию **${location.name}**`, player));
+world.on('delete-location', (name, player)=>world.send(`**${player.name}** стер локацию **${name}**`, player));
+world.on('delete-enemy', (name, player)=>world.send(`**${player.name}** стер существо **${name}**`, player));
 world.on('move-animal', (animal)=>{
-	world.send(`Животное **${animal.name}**, пришло на эту локацию`, animal);
+	world.send(`${animal.type=='animal'?'Животное':'Монстр'} **${animal.name}**, пришло на эту локацию`, animal);
 	map.enemys.forEach(enemy=>{
 		if(enemy.target==animal.id){
-			if(enemy.type='player')world.sendId(`Ваша цель ушла на другую локацию`, enemy.id);
-			enemy.target=null;
+			if(enemy.type=='player'){
+				if(enemy.concentration>50)world.sendId(`Ваша цель ушла на локацию **${animal.location}**`, enemy.id);
+				else world.sendId(`Ваша цель ушла на другую локацию`, enemy.id);
+				enemy.target=null;
+			}else{
+				if(enemy.type=='monster'){
+					if(enemy.concentration>50){
+						ii.monsterMove(animal, world, enemy.location);
+					}else enemy.target=null;
+				}
+			}
 		}
 	})
 });
@@ -248,15 +258,25 @@ world.on('move-player', (player)=>{
 	world.send(`Игрок **${player.name}**, пришол на эту локацию`, player);
 	map.enemys.forEach(enemy=>{
 		if(enemy.target==player.id){
-			if(player.type='player')world.sendId(`Ваша цель ушла на другую локацию`, enemy.id);
-			enemy.target=null;
+			if(enemy.type=='player'){
+				if(enemy.concentration>50)world.sendId(`Ваша цель ушла на локацию **${animal.location}**`, enemy.id);
+				else world.sendId(`Ваша цель ушла на другую локацию`, enemy.id);
+				enemy.target=null;
+			}else{
+				if(enemy.type=='monster'){
+					if(enemy.concentration>50){
+						ii.monsterMove(animal, world, enemy.location);
+					}else enemy.target=null;
+				}
+			}
 		}
 	})
 });
 world.on('death', enemy=>{
+	if(enemy.type=='player')world.sendId(`Вы умерли`, enemy.id)
 	map.enemys.forEach(enemy2=>{
 		if(enemy2.target==enemy.id){
-			if(enemy2.type='player')world.sendId(`Ваша цель умерла`, enemy2.id);
+			if(enemy2.type=='player')world.sendId(`Ваша цель умерла`, enemy2.id);
 			enemy2.target=null;
 		}
 	})
@@ -265,9 +285,12 @@ if(cv.actions){
 	if(cv.actions.player){
 		world.on('create-location', (location, player)=>console.log(`${player.name}: создал локацию '${location.name}'`))
 		world.on('delete-location', (name, player)=>console.log(`${player.name}: удалил локацию '${name}'`))
-	}if(cv.actions.events){
-		world.on('move-animal', animal=>console.log(`${animal.name} перешло на локацию ${animal.location}`))
 		world.on('move-player', player=>console.log(`${player.name} перешол на локацию ${player.location}`))
+	}if(cv.actions.events){
 		world.on('death', enemy=>console.log(`${enemy.name} умер(ла)`))
+	}if(cv.actions.enemy){
+		world.on('move-animal', animal=>console.log(`${animal.name} перешло на локацию ${animal.location}`))
+		world.on('target-monster-start', monster=>console.log(`${monster.name} ищет себе цель`))
+		world.on('target-monster-end', (target, monster=null)=>console.log((target?`${monster.name} нашел новую цель! ${target}`:`${monster.name} не нашел себе цель`)))
 	}
 }

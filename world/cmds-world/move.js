@@ -25,5 +25,6 @@ module.exports.run = async (world, message, args, enemy) => {
 	};
 };
 module.exports.help = {
-	name: "move"
+	name: "move",
+    admin: false
 };
