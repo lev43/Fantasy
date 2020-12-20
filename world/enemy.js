@@ -12,12 +12,23 @@ class Enemy{
 		this.concentration=0;
 		this.target=null;
 		this.damage=0;
+		this.aggression=0;
 	}
 }
 class Animal extends Enemy{
-	constructor(name, id, max_health, spawn_location, respawn){
+	constructor(name, id, max_health, damage, spawn_location, respawn, aggression, concentration, speed){
 		super(name, id, max_health, spawn_location, "animal");
 		this.respawn=respawn;
+		this.damage=damage;
+		this.speed=speed;		
+		this.aggression=aggression;
+		this.concentration=concentration;
+	}
+}
+class Monster extends Animal{
+	constructor(name, id, max_health, damage, spawn_location, respawn, aggression, concentration, speed){
+		super(name, id, max_health, damage, spawn_location, respawn, aggression, concentration, speed);
+		this.type='monster';
 	}
 }
 class Player extends Enemy{
@@ -25,12 +36,13 @@ class Player extends Enemy{
 		super(name, id, 100, spawn_location, "player", false);
 		this.concentration=50;
 		this.damage=5;
-		this.respawn=true;
+		this.respawn=false;
 	}
 }
 
 module.exports={
 	Enemy: Enemy,
 	Player: Player,
-	Animal: Animal
+	Animal: Animal,
+	Monster: Monster
 };

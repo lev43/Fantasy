@@ -23,5 +23,6 @@ module.exports.run = async (world, message, args, player) => {
 	};
 };
 module.exports.help = {
-	name: "delete"
+	name: "delete",
+    admin: true
 };

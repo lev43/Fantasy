@@ -12,9 +12,11 @@ module.exports.run = async (world, message, args, player) => {
     }
     let target=world.map.enemys.find(enemy=>enemy.id==player.target);
     world.sendId(`Вы атакуете **${target.name}**`, player.id);
-    world.sendId(`Вас атакует **${player.name}**`, target.id);
+    if(target.type=='player')
+        world.sendId(`Вас атакует **${player.name}**`, target.id);
     target.health-=player.damage;
 };
 module.exports.help = {
-	name: "attack"
+	name: "attack",
+    admin: false
 };
