@@ -4,7 +4,7 @@
   "description": "Нету истории, квестов, творите все что хотите!\r ## Можно взаимодействовать почти со всем!\r Хотите уничтожить замок врага?\r Без проблем, магия, кувалда и много другого, к вашим услугам!",
   "main": "null",
   "scripts": {
-    "start": "clear && echo 'start to Fantasy' && cd world && npm start"
+    "start": "./start.bat"
   },
   "repository": {
     "type": "git",
