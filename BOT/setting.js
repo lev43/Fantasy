@@ -10,7 +10,7 @@ for(let i=0;i<propertiesI.length;i++){
 properties = propertiesReader(global.DATA.setting);
 propertiesI = Object.keys(properties.path())
 
-
+global.setting = {}
 for(let i=0;i<propertiesI.length;i++){
   global.setting[propertiesI[i]]=properties.path()[propertiesI[i]]
 }

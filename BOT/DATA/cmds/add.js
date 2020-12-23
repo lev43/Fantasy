@@ -1,4 +1,4 @@
-let commands = global.dirListCommand(global.DATA.cmds + '/e/')
+let commands = global.dirListCommand(global.DATA.cmds + '/add/')
 
 module.exports.run = async (message, args)=>{
   let cmd = commands.get(args[0])
@@ -9,6 +9,6 @@ module.exports.run = async (message, args)=>{
 }
 
 module.exports.help = {
-  name: "e",
+  name: "add",
   admin: true
 }
