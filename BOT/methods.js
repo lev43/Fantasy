@@ -32,9 +32,15 @@ global.checkAdmin=(m)=>{
   if(m.member)m=m.member
   return m.hasPermission("ADMINISTRATOR")
 }
-global.send=(ch, msg, delay)=>{
-  if(ch.channel)ch=ch.channel
+global.say=(ch, msg, delay)=>{
+  if(ch.channel && ch.content)ch=ch.channel
+  if(ch.channel && ch.location)ch=global.server.channels.cache.get(ch.location)
   ch.send(msg).then(msg=>{if(delay>0)setTimeout(()=>msg.delete(), delay)})
+}
+
+global.send=(player, msg)=>{
+  let channel = global.server.channels.cache.get(player.channel)
+  channel.send(msg)
 }
 
 
@@ -93,8 +99,9 @@ global.manager = {
     },
     edit(id, parameters){
       if(!global.manager.location.check(id))return
+      console.log(`Edit location ${id}\n`)
       for(p in parameters){
-        console.log(`Edit ${p} ${id}\nNew value: ${parameters[p]}\n`)
+        console.log(`Parameter: ${p}\nNew value: ${parameters[p]}\n`)
         global.locations[id][p]=parameters[p]
       }
     },
@@ -103,6 +110,60 @@ global.manager = {
     },
     check(id){
       return (global.locations[id]?1:0)
+    }
+  },
+  enemy: {
+    create(enemy){
+      if(!enemy.name)enemy.name="NULL"
+      if(!enemy.type)enemy.type="enemy"
+      if(!enemy.spawn)enemy.spawn=global.locations[Object.keys(global.locations)[0]].id
+      enemy.location=enemy.spawn
+      if(!enemy.id){
+          global.server.roles.create({
+            data: {
+              name: enemy.name,
+              mentionable: true,
+              color: enemy.type
+            }
+          }).then(role=>{
+            enemy.id=role.id
+            global.enemy[enemy.id]=enemy
+            console.log(`Create enemy\nID: ${id}\nName: ${enemy.name}\nType: ${enemy.type}\nSpawn: ${enemy.spawn}\n`)
+            return enemy
+          })
+      }else{
+        global.server.channels.create(enemy.name, {type: "text", parent: global.rootChannels.players}).then(channel=>{
+          enemy.channel=channel.id
+          global.enemy[enemy.id]=enemy
+          console.log(`Create enemy\nID: ${id}\nName: ${enemy.name}\nType: ${enemy.type}\nSpawn: ${enemy.spawn}\n`)
+          return enemy
+        })
+      }
+    },
+    delete(id){
+      if(global.enemy[id]){
+        global.server.roles.fetch(id).then(role=>{
+          if(role)role.delete()
+          global.server.channels.cache.delete(enemy.channel)
+          console.log(`Delete enemy\nID: ${id}\nName: ${global.enemy[id].name}\nType: ${global.enemy[id].type}\n`)
+          delete global.enemy[id]
+          return true
+        })
+      }else return false
+    },
+    edit(id, parameters){
+      if(!global.manager.enemy.check(id))return
+      console.log(`Edit enemy ${id}\n`)
+      for(p in parameters){
+        console.log(`Parameter: ${p}\nNew value: ${parameters[p]}\n`)
+        global.enemy[id][p]=parameters[p]
+      }
+    },
+    get(id){
+      return global.enemy[id]
+    },
+    check(id){
+      return (global.enemy[id]?1:0)
     }
   }
 }
