@@ -38,9 +38,9 @@ global.say=(ch, msg, delay)=>{
   ch.send(msg).then(msg=>{if(delay>0)setTimeout(()=>msg.delete(), delay)})
 }
 
-global.send=(player, msg)=>{
+global.send=(player, msg, delay)=>{
   let channel = global.server.channels.cache.get(player.channel)
-  channel.send(msg)
+  channel.send(msg).then(msg=>{if(delay>0)setTimeout(()=>msg.delete(), delay)})
 }
 
 
@@ -81,7 +81,7 @@ global.manager = {
         for(let i=0; i<location.road.length; i++)
           global.locations[location.road[i]].road.push(location.id)
 
-        console.log(`Create location\nID: ${id}\nName: ${location.name}${location.road[0]?`\nRoad: ${location.road}`:''}\n`)
+        console.log(`Create location\nID: ${id}\nName: ${location.name}\nDescription: ${location.see}${location.road[0]?`\nRoad: ${location.road}`:''}\n`)
         return location
       })
     },

@@ -4,7 +4,7 @@ module.exports.run = async(message, args)=>{
   let player = global.enemy[message.author.id]
   if(!args[0]){
     for(i in global.locations[player.location].road)
-      global.send(player, `\`[${i}]:\`**\`${global.locations[global.locations[player.location].road[i]].name}\`**\n`, 5000)
+      global.send(player, `\`[${i}]:\`**\`${global.locations[global.locations[player.location].road[i]].name}\`**\n`, 10000)
     //global.send(player, `go->0\ngo->1\nИ т.д.`)
   }else{
     args[0]=parseInt(args[0])

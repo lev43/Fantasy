@@ -56,7 +56,7 @@ bot.on("ready", ()=>{
   bot.guilds.fetch(global.setting.serverID).then(guild=>{
     global.server = guild
 
-    //guild.channels.cache.each(channel=>{if(channel.type=="text")channel.messages.fetch().then(messages=>{for(let i=0; i<messages.array.length/100 || i==0; i++)channel.bulkDelete(100)})})
+    guild.channels.cache.each(channel=>{if(channel.type=="text")channel.messages.fetch().then(messages=>{for(let i=0; i<messages.array.length/100 || i==0; i++)channel.bulkDelete(100)})})
     
     
     /*bot.ws.on('INTERACTION_CREATE', async interaction => {
@@ -138,18 +138,6 @@ bot.on("message", async message => {
       if(!cmd.help.admin || global.checkAdmin(message))cmd.run(message, args)
     }
   }
-  /*global.server.members.fetch().then(members=>{
-    members.filter(member=>!member.user.bot).each(member=>{
-      let player = global.enemy[member.id]
-      if(player){
-        global.server.channels.cache.each(channel=>{
-          let VIEW = channel.id == player.channel || channel.id == player.location
-          let permissions = {VIEW_CHANNEL: VIEW, SEND_MESSAGES: VIEW}
-          channel.updateOverwrite(member, permissions).then(c=>{if(player.name=='lev43#7549' && VIEW)console.log('!', c.name)})
-        })
-      }else global.manager.enemy.create({name: member.user, id: member.id, type: 'player'})
-    })
-  })*/
   if(message.author.id!=bot.user.id)message.delete()
 })
 
