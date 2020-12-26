@@ -73,7 +73,8 @@ global.manager = {
         let location = {
           name: parameters.name,
           id: id,
-          road: parameters.road
+          road: parameters.road,
+          see: parameters.see
         }
         global.locations[id] = location
 
@@ -114,6 +115,7 @@ global.manager = {
   },
   enemy: {
     create(enemy){
+      if(!global.locations[Object.keys(global.locations)[0]])return false
       if(!enemy.name)enemy.name="NULL"
       if(!enemy.type)enemy.type="enemy"
       if(!enemy.spawn)enemy.spawn=global.locations[Object.keys(global.locations)[0]].id
@@ -132,10 +134,11 @@ global.manager = {
             return enemy
           })
       }else{
-        global.server.channels.create(enemy.name, {type: "text", parent: global.rootChannels.players}).then(channel=>{
+        global.server.channels.create((enemy.name.tag?enemy.name.username+'-'+enemy.name.discriminator:enemy.name), {type: "text", parent: global.rootChannels.players}).then(channel=>{
+          if(enemy.name.tag)enemy.name = enemy.name.tag
           enemy.channel=channel.id
           global.enemy[enemy.id]=enemy
-          console.log(`Create enemy\nID: ${id}\nName: ${enemy.name}\nType: ${enemy.type}\nSpawn: ${enemy.spawn}\n`)
+          console.log(`Create enemy\nID: ${enemy.id}\nName: ${enemy.name}\nType: ${enemy.type}\nSpawn: ${enemy.spawn}\nChannel: ${enemy.channel}\n`)
           return enemy
         })
       }
@@ -165,5 +168,17 @@ global.manager = {
     check(id){
       return (global.enemy[id]?1:0)
     }
+  }
+}
+
+global.interface = {
+  move(enemyID, locationID){
+    if(global.manager.enemy.check(enemyID) && global.manager.location.check(locationID)){
+      if(global.locations[global.enemy[enemyID].location].road.find(location=>location==locationID)){
+        global.enemy[enemyID].location = locationID
+        return true
+      }
+    }
+    return false
   }
 }
