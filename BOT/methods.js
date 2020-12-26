@@ -174,10 +174,25 @@ global.manager = {
 global.interface = {
   move(enemyID, locationID){
     if(global.manager.enemy.check(enemyID) && global.manager.location.check(locationID)){
-      if(global.locations[global.enemy[enemyID].location].road.find(location=>location==locationID)){
+      let enemy = global.enemy[enemyID]
+      if(global.locations[enemy.location].road.find(location=>location==locationID)){
+        global.server.channels.cache.get(enemy.location).send(`**${enemy.name}**, ушел отсюда.`).then(msg=>setTimeout(()=>msg.delete(), 5000))
+        global.server.channels.cache.get(locationID).send(`**${enemy.name}**, пришел сюда.`).then(msg=>setTimeout(()=>msg.delete(), 6000))
+
         global.enemy[enemyID].location = locationID
         return true
       }
+    }
+    return false
+  },
+  tp(enemyID, locationID){
+    if(global.manager.enemy.check(enemyID) && global.manager.location.check(locationID)){
+      let enemy = global.enemy[enemyID]
+      global.server.channels.cache.get(enemy.location).send(`**${enemy.name}**, исчез отсюда.`).then(msg=>setTimeout(()=>msg.delete(), 3000))
+      global.server.channels.cache.get(locationID).send(`**${enemy.name}**, появился здесь.`).then(msg=>setTimeout(()=>msg.delete(), 2000))
+
+      global.enemy[enemyID].location = locationID
+      return true
     }
     return false
   }
