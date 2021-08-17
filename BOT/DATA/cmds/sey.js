@@ -1,7 +1,7 @@
 const Discord = require("discord.js")
 
 module.exports.run = async(message, args)=>{
-  global.say(global.enemy[message.author.id], `\`${message.author.username}:\` ${args[0]}`, 60000)
+  global.sey(global.enemy[message.author.id].location, `\`${message.author.username}:\` ${args[0]}`)
 }
 
 module.exports.help = {

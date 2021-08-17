@@ -9,46 +9,64 @@ bot.commands = global.dirListCommand(global.DATA.cmds+'/')
 let token = require(global.DATA.token)
 global.locations=JSON.parse(fs.readFileSync(global.DATA.locations, "utf8"))
 global.enemy=JSON.parse(fs.readFileSync(global.DATA.enemy, "utf8"))
-global.cmds = ['add', 'delete', 'edit', 'see']
+global.cmds = ['add', 'delete', 'edit', 'see', 'attack']
 
 function update_player(){
   global.server.members.fetch().then(members=>{
     members.filter(member=>!member.user.bot).each(member=>{
       let player = global.enemy[member.id]
-      if(player){
+      if(!player)global.manager.enemy.create({name: member.user, id: member.id, type: 'player'})
+      else{
         global.server.channels.cache.each(channel=>{
-          let VIEW = channel.id == player.channel || channel.id == player.location
+          let VIEW = channel.id == player.channel
           let update = (channel.permissionsFor(member).bitfield==104320577)!=VIEW
-          //if(player.name=='lev43#7549' && channel.id == player.channel)console.log(channel.permissionsFor(member).bitfield, VIEW, update)
           let permissions = {VIEW_CHANNEL: VIEW, SEND_MESSAGES: VIEW}
           if(update && !player.updateChannel){
             player.updateChannel = true
-            channel.updateOverwrite(member, permissions).then(c=>{/*if(player.name=='lev43#7549')console.log(c.name, update);*/ player.updateChannel=false})
+            channel.updateOverwrite(member, permissions).then(c=>{player.updateChannel=false})
           }
         })
-      }else global.manager.enemy.create({name: member.user, id: member.id, type: 'player'})
+      }
     })
   })
 
   for(id in global.enemy){
-    let player = global.enemy[id]
-    if(player.type=='player'){
+    let enemy = global.enemy[id]
+    if(enemy.type=='player'){
       if(Object.keys(global.locations).length>0){
-        if(!global.locations[player.spawn]){
-          player.spawn = global.locations[Object.keys(global.locations)[0]].id
+        if(!global.locations[enemy.spawn]){
+          enemy.spawn = global.locations[Object.keys(global.locations)[0]].id
         }
-        if(!global.locations[player.location]){
-          player.location = player.spawn
+        if(!global.locations[enemy.location]){
+          enemy.location = enemy.spawn
         }
       }
     }
+    if(enemy){
+      if(global.interface.checkDead(enemy.id)){
+        global.enemy[enemy.id].location=enemy.spawn
+        global.enemy[enemy.id].health=enemy.maxHealth
+        if(enemy.type=='player'){
+          global.send(enemy, `**Вы погибли**\nВы перемещенны на локацию **${global.locations[enemy.spawn].name}**`)
+        }
+        global.sey(enemy.location, `**${enemy.name}** погиб(ла)`, 0, enemy)
+      }else{
+        if(enemy.regenerateTime<1){
+          global.interface.regenerate(enemy.id)
+          global.enemy[enemy.id].regenerateTime=enemy.regeneration
+        }else global.enemy[enemy.id].regenerateTime--;
+        global.interface.updateHealth(enemy.id)
+      }
+    }
   }
+
   
   fs.writeFile(global.DATA.enemy, JSON.stringify(global.enemy), err=>{if(err)throw err})
 }
 
 bot.on("ready", ()=>{
   console.log(`Start bot`)
+  global.bot=bot
   global.bot.generateInvite().then(link => {
     console.log(link);
   });
@@ -57,23 +75,6 @@ bot.on("ready", ()=>{
     global.server = guild
 
     guild.channels.cache.each(channel=>{if(channel.type=="text")channel.messages.fetch().then(messages=>{for(let i=0; i<messages.array.length/100 || i==0; i++)channel.bulkDelete(100)})})
-    
-    
-    /*bot.ws.on('INTERACTION_CREATE', async interaction => {
-      //console.log(interaction)
-      console.log(bot.api.applications(bot.user.id).guilds(global.setting.serverID).commands(interaction.data.id).delete())
-    })*/
-    
-    //guild.channels.cache.filter(channel=>channel.type != 'category').each(channel=>channel.delete())
-    
-    global.rootChannels.locations = guild.channels.cache.find(chan=>chan.type==="category" && chan.name === "locations")
-    if(!global.rootChannels.locations)
-    guild.channels.create("locations", {type: "category"}).then(chan=>global.rootChannels.locations=chan)
-    
-    global.rootChannels.players = guild.channels.cache.find(chan=>chan.type==="category" && chan.name === "players")
-    if(!global.rootChannels.players)
-    guild.channels.create("players", {type: "category"}).then(chan=>global.rootChannels.players=chan)
-    
 
     for(i in global.enemy){
       if(global.enemy[i].type=='player' && !guild.channels.cache.get(global.enemy[i].channel))
@@ -85,31 +86,40 @@ bot.on("ready", ()=>{
 
     
     bot.setInterval(()=>{
-      for(id in global.locations){
-        if(global.server.channels.cache.get(id))global.server.channels.cache.get(id).edit({name: global.locations[id].name})
-        else global.manager.location.delete(id)
-      }
       if(!Object.keys(global.locations).length>0)global.manager.location.create({name: "Central location"})
       
 
-      global.server.channels.cache.filter(channel=>channel.parent==global.rootChannels.players).each(channel=>{
+      global.server.channels.cache.each(channel=>{
         let y=false;
         for(i in global.enemy)
           if(global.enemy[i].type=='player' && global.enemy[i].channel==channel.id){y=true;break}
         if(!y)channel.delete()
       })
 
-      global.server.channels.cache.filter(channel=>channel.parent==global.rootChannels.locations).each(channel=>{
-        if(!global.locations[channel.id])channel.delete()
-      })
-
       fs.writeFile(global.DATA.locations, JSON.stringify(global.locations), err=>{if(err)throw err})
     }, 10000, [])
 
+    bot.setInterval(()=>{
+      for(id in global.enemy){
+        let player = global.enemy[id]
+        if(player.type=='player'){
+          guild.channels.resolve(player.channel).send('\`~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\`')
+        }
+      }
+    }, 5000)
 
     bot.setInterval(()=>{
       update_player()
     }, 1000, [])
+    bot.setInterval(()=>{
+      for(id in global.enemy){
+        let player = global.enemy[id]
+        if(player.type=='player'){
+          global.interface.updateEnemy(player.id)
+          global.send(player, `Ваши характеристики понижены`)
+        }
+      }
+    }, 20*10000)
   })
 })
 
@@ -118,13 +128,13 @@ bot.on("message", async message => {
     let player = global.enemy[message.author.id]
     if(!player)global.manager.enemy.create({name: message.author.username, type: "player", id: message.author.id})
     let msg = message.content
-    let args = msg.split("->")
+    let args = msg.split("/")
     let command = args.shift()
-    if(command[0]=='/'){
+    if(msg[0]=='/'){
       command='/'
       args[0]=msg.slice(1)
     }
-    if(command[0]=='!'){
+    if(msg[0]=='!'){
       command='!'
       args[0]=msg.slice(1)
     }
@@ -133,12 +143,24 @@ bot.on("message", async message => {
       args.unshift(command)
       command='cmds'
     }
+    if(message.author.id!=bot.user.id)message.delete()
     let cmd = bot.commands.get(command)
     if(cmd){
       if(!cmd.help.admin || global.checkAdmin(message))cmd.run(message, args)
     }
+  }else if(message.author.id!=bot.user.id)message.delete()
+})
+
+bot.on('CHANNEL_MESSAGE', (channelID, content, delay, player1)=>{
+  let channel
+  if(typeof channelID == 'string')channel = global.server.channels.resolve(channelID)
+  else{channel = channelID; channelID = channel.id}
+  for(i in global.enemy){
+    let player = global.enemy[i]
+    if(player.type == 'player' && player.location == channelID && (player1?player1.id!=player.id:true)){
+      global.send(player, content)
+    }
   }
-  if(message.author.id!=bot.user.id)message.delete()
 })
 
 bot.login(token)
